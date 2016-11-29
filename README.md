@@ -3,19 +3,19 @@ John Popenuck
 James Harris
 
 SELECT Basics
-```
+```sql
 SELECT population FROM world
   WHERE name = 'Germany';
 
 SELECT name, population FROM world
-  WHERE name IN ('Ireland', 'Iceland', 'Denmark');```
+  WHERE name IN ('Ireland', 'Iceland', 'Denmark');
 
 SELECT name, area FROM world
   WHERE area BETWEEN 200000 AND 250000
 ```
 
 SELECT from WORLD
-```
+```sql
 SELECT name, continent, population FROM world
 
 SELECT name FROM world
@@ -69,7 +69,7 @@ WHERE tld IN ('.ag','.ba','.bb','.ca','.cn','.nz','.ru','.tr','.uk')
 ORDER BY name
 ```
 SELECT from NOBEL
-```
+```sql
 
 SELECT yr, subject, winner
   FROM nobel
@@ -129,7 +129,7 @@ SELECT winner, subject
 
 ```
 JOIN and UEFA EURO 2012
-```
+```sql
 SELECT matchid, player FROM goal
   WHERE teamid = 'GER'
 
@@ -190,7 +190,7 @@ SELECT mdate,
   ORDER BY mdate, matchid, team1, team2
 ```
 [Movie JOIN Operations](http://sqlzoo.net/wiki/More_JOIN_operations)
-```
+```sql
 1.
 SELECT id, title
   FROM movie
@@ -255,61 +255,61 @@ WHERE actor.name='Julie Andrews' IN (
   SELECT id FROM actor.name
   WHERE name='Julie Andrews')
 
-  13.
+13.
 
-  Long solution:
-  ```sql
-  SELECT andrews_movies.title, leading_actors.name FROM
+Long solution:
+```sql
+SELECT andrews_movies.title, leading_actors.name FROM
 
-  (SELECT DISTINCT movie.title, movieid
-  FROM actor JOIN casting ON actorid=actor.id JOIN movie ON movie.id = movieid
-  WHERE actor.name='Julie Andrews') AS andrews_movies
+(SELECT DISTINCT movie.title, movieid
+FROM actor JOIN casting ON actorid=actor.id JOIN movie ON movie.id = movieid
+WHERE actor.name='Julie Andrews') AS andrews_movies
 
-  JOIN
+JOIN
 
-  (SELECT movieid, actor.name
-  FROM actor JOIN casting ON actorid=actor.id JOIN movie ON movie.id = movieid
-  WHERE ord=1) AS leading_actors
+(SELECT movieid, actor.name
+FROM actor JOIN casting ON actorid=actor.id JOIN movie ON movie.id = movieid
+WHERE ord=1) AS leading_actors
 
-  ON andrews_movies.movieid=leading_actors.movieid
-  ```
-  Short solution:
-  ```sql
-  SELECT title, name
-    FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
-    WHERE ord=1 AND movieid IN (SELECT movieid
-    FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
-    WHERE name = 'Julie Andrews')
-  ```
-
-  14.
-  ```sql
-  SELECT name
+ON andrews_movies.movieid=leading_actors.movieid
+```
+Short solution:
+```sql
+SELECT title, name
   FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
-  WHERE ord=1
-  GROUP BY name
-  HAVING COUNT(name) >= 30
-  ```
-
-  15.
-  ```
-  SELECT title, COUNT(actorid)
+  WHERE ord=1 AND movieid IN (SELECT movieid
   FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
-  WHERE yr=1978
-  GROUP BY title
-  ORDER BY COUNT(actorid) DESC, title
-  ```
-  16.
-  ```
-  SELECT name
+  WHERE name = 'Julie Andrews')
+```
 
-  FROM (SELECT movieid
-    FROM actor JOIN casting ON id = actorid
-    WHERE name='Art Garfunkel') AS art_movies
+14.
+```sql
+SELECT name
+FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
+WHERE ord=1
+GROUP BY name
+HAVING COUNT(name) >= 30
+```
 
-  JOIN casting ON art_movies.movieid=casting.movieid
-  JOIN actor ON id=actorid WHERE name != 'Art Garfunkel'
-  ```
+15.
+```sql
+SELECT title, COUNT(actorid)
+FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
+WHERE yr=1978
+GROUP BY title
+ORDER BY COUNT(actorid) DESC, title
+```
+16.
+```sql
+SELECT name
+
+FROM (SELECT movieid
+  FROM actor JOIN casting ON id = actorid
+  WHERE name='Art Garfunkel') AS art_movies
+
+JOIN casting ON art_movies.movieid=casting.movieid
+JOIN actor ON id=actorid WHERE name != 'Art Garfunkel'
+```
 [SUM and COUNT](http://sqlzoo.net/wiki/SUM_and_COUNT)
 
 1.
@@ -443,5 +443,83 @@ WHERE y.continent=x.continent)
 
 9.
 ```sql
+SELECT name,continent, population FROM world x
+WHERE 25000000 >= ALL
+(SELECT population FROM world y
+WHERE y.continent=x.continent)
+```
 
+10.
+```sql
+SELECT name,continent FROM world x
+WHERE population > ALL
+(SELECT population*3 FROM world y
+WHERE x.continent=y.continent AND x.name != y.name)
+```
+
+[Using Null](http://sqlzoo.net/wiki/Using_Null)
+
+1.
+```sql
+SELECT name FROM teacher
+WHERE dept IS NULL
+```
+
+2.
+```sql
+SELECT teacher.name, dept.name
+ FROM teacher INNER JOIN dept
+           ON (teacher.dept=dept.id)
+```
+
+3.
+```sql
+SELECT teacher.name, dept.name
+ FROM teacher LEFT OUTER JOIN dept
+  ON (teacher.dept=dept.id)
+```
+4.
+```sql
+SELECT teacher.name, dept.name
+ FROM teacher RIGHT OUTER JOIN dept
+  ON (teacher.dept=dept.id)
+```
+5.
+```sql
+SELECT name, COALESCE(mobile, '07986 444 2266') FROM teacher
+```
+6.
+```sql
+SELECT teacher.name, COALESCE(dept.name, 'None')
+ FROM teacher LEFT JOIN dept
+  ON (teacher.dept=dept.id)
+```
+7.
+```sql
+SELECT COUNT(name), COUNT(mobile) FROM teacher
+```
+8.
+```sql
+SELECT dept.name, COUNT(teacher.name)
+FROM teacher RIGHT JOIN dept ON teacher.dept=dept.id
+GROUP BY dept.name
+```
+9.
+```sql
+SELECT teacher.name, CASE
+       WHEN dept.id=1 THEN 'Sci'
+       WHEN dept.id=2 THEN 'Sci'
+       ELSE 'Art'
+       END
+FROM teacher LEFT JOIN dept ON teacher.dept=dept.id
+```
+10.
+```sql
+SELECT teacher.name, CASE
+       WHEN dept.id=1 THEN 'Sci'
+       WHEN dept.id=2 THEN 'Sci'
+       WHEN dept.id=3 THEN 'Art'
+       ELSE 'None'
+       END
+FROM teacher LEFT JOIN dept ON teacher.dept=dept.id
 ```
