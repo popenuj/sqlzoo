@@ -254,3 +254,194 @@ JOIN actor ON actor.id=actorid
 WHERE actor.name='Julie Andrews' IN (
   SELECT id FROM actor.name
   WHERE name='Julie Andrews')
+
+  13.
+
+  Long solution:
+  ```sql
+  SELECT andrews_movies.title, leading_actors.name FROM
+
+  (SELECT DISTINCT movie.title, movieid
+  FROM actor JOIN casting ON actorid=actor.id JOIN movie ON movie.id = movieid
+  WHERE actor.name='Julie Andrews') AS andrews_movies
+
+  JOIN
+
+  (SELECT movieid, actor.name
+  FROM actor JOIN casting ON actorid=actor.id JOIN movie ON movie.id = movieid
+  WHERE ord=1) AS leading_actors
+
+  ON andrews_movies.movieid=leading_actors.movieid
+  ```
+  Short solution:
+  ```sql
+  SELECT title, name
+    FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
+    WHERE ord=1 AND movieid IN (SELECT movieid
+    FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
+    WHERE name = 'Julie Andrews')
+  ```
+
+  14.
+  ```sql
+  SELECT name
+  FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
+  WHERE ord=1
+  GROUP BY name
+  HAVING COUNT(name) >= 30
+  ```
+
+  15.
+  ```
+  SELECT title, COUNT(actorid)
+  FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
+  WHERE yr=1978
+  GROUP BY title
+  ORDER BY COUNT(actorid) DESC, title
+  ```
+  16.
+  ```
+  SELECT name
+
+  FROM (SELECT movieid
+    FROM actor JOIN casting ON id = actorid
+    WHERE name='Art Garfunkel') AS art_movies
+
+  JOIN casting ON art_movies.movieid=casting.movieid
+  JOIN actor ON id=actorid WHERE name != 'Art Garfunkel'
+  ```
+[SUM and COUNT](http://sqlzoo.net/wiki/SUM_and_COUNT)
+
+1.
+```sql
+SELECT SUM(population)
+FROM world
+```
+
+2.
+```sql
+SELECT DISTINCT continent
+FROM world
+```
+
+3.
+```sql
+SELECT SUM(gdp)
+FROM world
+WHERE continent='Africa'
+```
+
+4.
+```sql
+SELECT COUNT(name)
+FROM world
+WHERE area >= 1000000
+```
+
+5.
+```sql
+SELECT SUM(population)
+FROM world
+WHERE name IN ('France','Germany','Spain')
+```
+
+6.
+```sql
+SELECT continent, COUNT(name)
+FROM world
+GROUP BY continent
+```
+
+7.
+```sql
+SELECT continent, COUNT(name)
+FROM world
+WHERE population > 10000000
+GROUP BY continent
+```
+
+8.
+```sql
+SELECT continent
+FROM world
+GROUP BY continent
+HAVING SUM(population) > 100000000
+```
+
+[SELECT within SELECT](http://sqlzoo.net/wiki/SELECT_within_SELECT_Tutorial)
+
+1.
+```sql
+SELECT name FROM world
+  WHERE population >
+     (SELECT population FROM world
+      WHERE name='Russia')
+```
+
+2.
+```sql
+SELECT name FROM world
+WHERE continent='Europe' AND gdp/population >
+(SELECT gdp/population FROM world
+WHERE name='United Kingdom')
+```
+
+3.
+```sql
+SELECT name, continent FROM world
+WHERE continent IN
+(SELECT continent FROM world
+WHERE name IN ('Argentina','Australia'))
+ORDER BY name
+```
+
+4.
+```sql
+SELECT name, population FROM world
+WHERE population >
+(SELECT population FROM world WHERE name='Canada')
+AND population < (SELECT population FROM world WHERE name='Poland')
+```
+
+5.
+```sql
+SELECT name,
+CONCAT(
+ROUND(
+population/(SELECT population FROM world WHERE name='Germany')*100,
+0),
+'%')
+FROM world
+WHERE continent = 'Europe'
+```
+
+6.
+```sql
+SELECT name
+  FROM world
+ WHERE population >= ALL(SELECT population
+                           FROM world
+                          WHERE population>0)
+```
+
+7.
+```sql
+SELECT continent, name, area FROM world x
+  WHERE area >= ALL
+    (SELECT area FROM world y
+        WHERE y.continent=x.continent
+          AND area>0)
+```
+
+8.
+```sql
+SELECT continent, name FROM world x
+WHERE name <=ALL
+(SELECT name FROM world y
+WHERE y.continent=x.continent)
+```
+
+9.
+```sql
+
+```
