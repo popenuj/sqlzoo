@@ -246,76 +246,11 @@ SELECT title, name
   FROM movie JOIN casting ON movie.id=movieid
              JOIN actor ON actor.id=actorid
   WHERE yr=1962 AND ord=1
-```
 
 12.
-```
-SELECT yr,COUNT(title) FROM
-  movie JOIN casting ON movie.id=movieid
-         JOIN actor   ON actorid=actor.id
-WHERE name='John Travolta'
-GROUP BY yr
-HAVING COUNT(title)=(SELECT MAX(c) FROM
-(SELECT yr,COUNT(title) AS c FROM
-   movie JOIN casting ON movie.id=movieid
-         JOIN actor   ON actorid=actor.id
- WHERE name='John Travolta'
- GROUP BY yr) AS t
-)
-```
-
-13.
-
-Long solution:
-```sql
-SELECT andrews_movies.title, leading_actors.name FROM
-
-(SELECT DISTINCT movie.title, movieid
-FROM actor JOIN casting ON actorid=actor.id JOIN movie ON movie.id = movieid
-WHERE actor.name='Julie Andrews') AS andrews_movies
-
-JOIN
-
-(SELECT movieid, actor.name
-FROM actor JOIN casting ON actorid=actor.id JOIN movie ON movie.id = movieid
-WHERE ord=1) AS leading_actors
-
-ON andrews_movies.movieid=leading_actors.movieid
-```
-Short solution:
-```sql
 SELECT title, name
-  FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
-  WHERE ord=1 AND movieid IN (SELECT movieid
-  FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
-  WHERE name = 'Julie Andrews')
-```
-
-14.
-```sql
-SELECT name
-FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
-WHERE ord=1
-GROUP BY name
-HAVING COUNT(name) >= 30
-```
-
-15.
-```
-SELECT title, COUNT(actorid)
-FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
-WHERE yr=1978
-GROUP BY title
-ORDER BY COUNT(actorid) DESC, title
-```
-16.
-```
-SELECT name
-
-FROM (SELECT movieid
-  FROM actor JOIN casting ON id = actorid
-  WHERE name='Art Garfunkel') AS art_movies
-
-JOIN casting ON art_movies.movieid=casting.movieid
-JOIN actor ON id=actorid WHERE name != 'Art Garfunkel'
-```
+FROM movie JOIN casting ON movie.id=movieid
+JOIN actor ON actor.id=actorid
+WHERE actor.name='Julie Andrews' IN (
+  SELECT id FROM actor.name
+  WHERE name='Julie Andrews')
