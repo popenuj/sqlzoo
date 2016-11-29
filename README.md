@@ -3,19 +3,19 @@ John Popenuck
 James Harris
 
 SELECT Basics
-```sql
+```
 SELECT population FROM world
   WHERE name = 'Germany';
 
 SELECT name, population FROM world
-  WHERE name IN ('Ireland', 'Iceland', 'Denmark');
+  WHERE name IN ('Ireland', 'Iceland', 'Denmark');```
 
 SELECT name, area FROM world
   WHERE area BETWEEN 200000 AND 250000
 ```
 
 SELECT from WORLD
-```sql
+```
 SELECT name, continent, population FROM world
 
 SELECT name FROM world
@@ -69,7 +69,7 @@ WHERE tld IN ('.ag','.ba','.bb','.ca','.cn','.nz','.ru','.tr','.uk')
 ORDER BY name
 ```
 SELECT from NOBEL
-```sql
+```
 
 SELECT yr, subject, winner
   FROM nobel
@@ -129,7 +129,7 @@ SELECT winner, subject
 
 ```
 JOIN and UEFA EURO 2012
-```sql
+```
 SELECT matchid, player FROM goal
   WHERE teamid = 'GER'
 
@@ -190,7 +190,7 @@ SELECT mdate,
   ORDER BY mdate, matchid, team1, team2
 ```
 [Movie JOIN Operations](http://sqlzoo.net/wiki/More_JOIN_operations)
-```sql
+```
 1.
 SELECT id, title
   FROM movie
@@ -255,61 +255,60 @@ WHERE actor.name='Julie Andrews' IN (
   SELECT id FROM actor.name
   WHERE name='Julie Andrews')
 
-13.
+  13.
 
-Long solution:
-```sql
-SELECT andrews_movies.title, leading_actors.name FROM
+  Long solution:
+  ```sql
+  SELECT andrews_movies.title, leading_actors.name FROM
 
-(SELECT DISTINCT movie.title, movieid
-FROM actor JOIN casting ON actorid=actor.id JOIN movie ON movie.id = movieid
-WHERE actor.name='Julie Andrews') AS andrews_movies
+  (SELECT DISTINCT movie.title, movieid
+  FROM actor JOIN casting ON actorid=actor.id JOIN movie ON movie.id = movieid
+  WHERE actor.name='Julie Andrews') AS andrews_movies
 
-JOIN
+  JOIN
 
-(SELECT movieid, actor.name
-FROM actor JOIN casting ON actorid=actor.id JOIN movie ON movie.id = movieid
-WHERE ord=1) AS leading_actors
+  (SELECT movieid, actor.name
+  FROM actor JOIN casting ON actorid=actor.id JOIN movie ON movie.id = movieid
+  WHERE ord=1) AS leading_actors
 
-ON andrews_movies.movieid=leading_actors.movieid
-```
-Short solution:
-```sql
-SELECT title, name
+  ON andrews_movies.movieid=leading_actors.movieid
+  ```
+  Short solution:
+  ```sql
+  SELECT title, name
+    FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
+    WHERE ord=1 AND movieid IN (SELECT movieid
+    FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
+    WHERE name = 'Julie Andrews')
+  ```
+
+  14.
+  ```sql
+  SELECT name
   FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
-  WHERE ord=1 AND movieid IN (SELECT movieid
+  WHERE ord=1
+  GROUP BY name
+  HAVING COUNT(name) >= 30
+  ```
+
+  15.
+  ```
+  SELECT title, COUNT(actorid)
   FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
-  WHERE name = 'Julie Andrews')
-```
+  WHERE yr=1978
+  GROUP BY title
+  ORDER BY COUNT(actorid) DESC, title
+  ```
+  16.
+  ```
+  SELECT name
+  FROM (SELECT movieid
+    FROM actor JOIN casting ON id = actorid
+    WHERE name='Art Garfunkel') AS art_movies
 
-14.
-```sql
-SELECT name
-FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
-WHERE ord=1
-GROUP BY name
-HAVING COUNT(name) >= 30
-```
-
-15.
-```sql
-SELECT title, COUNT(actorid)
-FROM actor JOIN casting ON id = actorid JOIN movie ON movie.id = movieid
-WHERE yr=1978
-GROUP BY title
-ORDER BY COUNT(actorid) DESC, title
-```
-16.
-```sql
-SELECT name
-
-FROM (SELECT movieid
-  FROM actor JOIN casting ON id = actorid
-  WHERE name='Art Garfunkel') AS art_movies
-
-JOIN casting ON art_movies.movieid=casting.movieid
-JOIN actor ON id=actorid WHERE name != 'Art Garfunkel'
-```
+  JOIN casting ON art_movies.movieid=casting.movieid
+  JOIN actor ON id=actorid WHERE name != 'Art Garfunkel'
+  ```
 [SUM and COUNT](http://sqlzoo.net/wiki/SUM_and_COUNT)
 
 1.
